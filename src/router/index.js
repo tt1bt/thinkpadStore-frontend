@@ -1,40 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-// 页面组件
 import StoreApp from '@/components/StoreApp.vue'
 import ProductDetail from '@/components/ProductDetail.vue'
-import Cart from '@/components/Cart.vue'
-import RegisterUser from '@/components/RegisterUser.vue'
-import Login from '@/components/Login.vue'   // ✅ 新增登录组件
+import ShoppingCart from '@/components/ShoppingCart.vue'
+import Login from '@/components/Login.vue'
 
 const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: StoreApp
-  },
-  {
-    path: '/product/:id',
-    name: 'ProductDetail',
-    component: ProductDetail,
-    props: true
-  },
-  {
-    path: '/cart',
-    name: 'ShoppingCart',
-    component: Cart,
-    props: true
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: RegisterUser
-  },
-  {
-    path: '/login',          // ✅ 登录路由
-    name: 'Login',
-    component: Login
-  }
+  { path: '/', name: 'Home', component: StoreApp },
+  { path: '/product/:id', name: 'ProductDetail', component: ProductDetail, props: true },
+  { path: '/cart', name: 'ShoppingCart', component: ShoppingCart, props: true },
+  { path: '/login', name: 'Login', component: Login },
+  { path: '/register', name: 'Register', component: RegisterUser },
 ]
 
 const router = createRouter({
