@@ -45,6 +45,13 @@
             <h2>{{ product.name }}</h2>
             <span class="product-count">数量: {{ quantity }}</span>
           </div>
+          
+          <!-- 新增：商品详细配置展示 -->
+          <div v-if="productModelConfig" class="product-model-config">
+            <span class="config-label">详细配置：</span>
+            <span class="config-value">{{ productModelConfig }}</span>
+          </div>
+
           <div class="product-back">
             <div class="product-price">
               价格: ¥{{ formatPrice(Number(product.price || 0) + Number(selectedExtraPrice)) }}
@@ -126,17 +133,13 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const selectedExtraPrice = ref(0)
+    // 新增：存储处理后的商品配置
+    const productModelConfig = ref('')
 
-    // 额外配置选项
-    const extraPriceOptions = ref([
-      { label: '基础配置', price: 0 },
-      { label: '内存升级', price: 500 },
-      { label: '硬盘升级', price: 800 },
-      { label: '保修延长', price: 300 },
-      { label: '配件套装', price: 200 }
-    ])
+    // 🔥 修改1：移除写死的配置，改为空数组
+    const extraPriceOptions = ref([])
 
-    // 计算属性：将额外配置选项按行分组（每行2个）
+    // 计算属性：将额外配置选项按行分组（每行2个）（无需修改）
     const extraPriceRows = computed(() => {
       const rows = []
       for (let i = 0; i < extraPriceOptions.value.length; i += 2) {
@@ -153,10 +156,8 @@ export default {
     // 图片错误处理
     const handleImageError = (index) => {
       console.warn(`图片加载失败，索引: ${index}`)
-      // 可以在这里设置默认图片
     }
 
-    // 获取商品详情
     const fetchProductDetail = async () => {
       try {
         loading.value = true
@@ -164,31 +165,83 @@ export default {
 
         const productId = route.params.id
         const productData = await productService.getById(productId)
+        console.log('后端返回的equipments:', productData)
 
         product.value = productData
 
-        // 设置商品图片，如果API有图片数据就使用，否则使用默认图片
+        // 新增：处理商品配置信息
+        if (productData.model) {
+          // 将#替换为/，并去除首尾多余的分隔符
+          productModelConfig.value = productData.model.replace(/#/g, '/').replace(/^\/|\/$/g, '')
+          console.log('处理后的商品配置:', productModelConfig.value)
+        } else {
+          productModelConfig.value = ''
+        }
+
+        // 设置商品图片
         if (productData.image) {
           productImages.value = [productData.image, logo1, logo, logo, logo]
+        }
+
+        // 核心：从后端 equiments 填充配件配置
+        if (productData.equipments && Array.isArray(productData.equipments)) 
+        {
+          extraPriceOptions.value = productData.equipments.map(item => ({
+            label: item.name || '未知配件',
+            price: Number(item.extra_price) || 0
+          }))
+          // 兜底：空数组时补充基础配置
+          if (extraPriceOptions.value.length === 0)
+           {
+            extraPriceOptions.value = [{ label: '基础配置', price: 0 }]
+          }
+          console.log('映射后的配件配置：', extraPriceOptions.value) // 调试日志
+        } 
+        else {
+          // 后端无数据时的兜底配置
+          extraPriceOptions.value = [
+            { label: '基础配置', price: 0 },
+            { label: '内存升级', price: 500 },
+            { label: '硬盘升级', price: 800 },
+            { label: '保修延长', price: 300 },
+            { label: '配件套装', price: 200 }
+          ]
         }
 
       } catch (err) {
         console.error('获取商品详情失败:', err)
         error.value = '获取商品详情失败，请稍后重试'
 
-        // 如果API失败，使用模拟数据
+        // 异常时的模拟数据（补充 equiments）
         product.value = {
           id: route.params.id || 1,
           name: 'ThinkPad T14p 2023',
           price: 5699,
-          description: '高性能商务笔记本'
+          description: '高性能商务笔记本',
+          // 新增：模拟model字段
+          model: 'i7-13700H#32GB内存#1TB SSD#RTX4060#2.5K屏',
+          equiments: [
+            { name: '基础配置', price: 0 },
+            { name: '内存升级', price: 500 },
+            { name: '硬盘升级', price: 800 },
+            { name: '保修延长', price: 300 },
+            { name: '配件套装', price: 200 }
+          ]
         }
+        // 处理模拟数据的配置信息
+        productModelConfig.value = product.value.model.replace(/#/g, '/').replace(/^\/|\/$/g, '')
+        
+        // 异常时也填充配件配置
+        extraPriceOptions.value = product.value.equipments.map(item => ({
+          label: item.name,
+          price: item.extra_price
+        }))
       } finally {
         loading.value = false
       }
     }
 
-    // 方法
+    // 其他方法无需修改
     const switchImage = (index) => {
       currentIndex.value = index
       isZoomed.value = false
@@ -300,6 +353,7 @@ export default {
       extraPriceRows,
       showCartSidebar,
       cartState,
+      productModelConfig, // 新增：返回处理后的配置数据
       switchImage,
       toggleImageZoom,
       increaseQuantity,
@@ -406,7 +460,7 @@ export default {
   padding-left: 20px; /* 添加左边距 */
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 使按钮靠下对齐 */
+  justify-content: space-between;
 }
 
 .product-title {
@@ -420,6 +474,32 @@ export default {
   font-size: 14px;
   color: #666;
   margin-left: 10px; /* 添加左边距 */
+}
+
+.product-model-config {
+  font-size: 16px;
+  color: #666;
+  margin: 8px 0;
+  padding: 6px 10px;
+  background-color: #fdfdfd;
+  border-left: 3px solid #409EFF;
+  border-radius: 2px;
+  width: 70%;
+  text-align: left; /* 确保整体文本靠左 */
+}
+
+/* 详细配置标签样式 */
+.config-label {
+  font-weight: bold;
+  color: #333;
+  margin-right: 4px;
+}
+
+/* 详细配置值样式 */
+.config-value {
+  display: inline-block;
+  text-align: left;
+  word-wrap: break-word; /* 超长时自动换行 */
 }
 
 .product-price {
@@ -440,9 +520,10 @@ export default {
 }
 
 .product-back {
-  background-color: #f0f0f0;
+  background-color: #fbfbfb;
   padding: 10px;
   border-radius: 4px;
+  border-left: 3px solid #ff5356;
   width: 70%;
 }
 
@@ -450,7 +531,7 @@ export default {
 .extra-price-config {
   margin: 15px 0;
   padding: 10px;
-  background-color: #f8f8f8;
+  background-color: #f9fdff;
   border-radius: 4px;
   width: 70%;
 }
@@ -519,18 +600,23 @@ export default {
 
 .action-buttons {
   display: flex;
-  gap: 15px;
+  gap: 15px; /* 按钮之间的间距 */
   margin-top: 20px;
+  width: 70%; /* 与价格区域完全对齐 */
 }
 
-.add-to-cart-btn, .buy-now-btn {
+/* 按钮样式：均分宽度 + 缩小视觉宽度 */
+.add-to-cart-btn,.buy-now-btn {
   color: #fff;
   border: none;
-  padding: 12px 20px;
+  padding: 12px 20px; /* 内边距控制按钮高度/视觉宽度 */
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
-  flex: 1;
+  flex: 1; 
+  max-width: 200px; 
+  min-width: 120px;
+  text-align: center; 
   transition: all 0.3s ease;
 }
 
@@ -554,10 +640,12 @@ export default {
 
 /* 产品描述样式 */
 .product-description {
-  color: #666;
+  color: #555;
+  font-style: italic;
   font-size: 14px;
   margin-top: 10px;
   line-height: 1.5;
+  text-align: left
 }
 
 /*点击图片后，图片放大并移动到屏幕中央 */
@@ -651,6 +739,11 @@ export default {
   }
   .product-back {
     width: 100%;
+  }
+  /* 移动端商品配置样式适配 */
+  .product-model-config {
+    width: 100%;
+    text-align: left;
   }
 }
 </style>
