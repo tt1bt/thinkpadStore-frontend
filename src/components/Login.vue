@@ -74,7 +74,7 @@ export default {
 
         alert('登录成功')
         this.$router.push('/')
-        window.location.reload()
+        //window.location.reload()
       } catch (err) {
         console.error(err)
         alert('登录失败，请检查用户名或密码')

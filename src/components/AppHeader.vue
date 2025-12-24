@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { inject, computed, ref, onMounted } from 'vue'
+import { inject, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default {
@@ -50,22 +50,38 @@ export default {
   setup() {
     const router = useRouter()
 
-    // 注入购物车状态和方法
+    // ===== 登录状态 =====
+    const isLogin = ref(false)
+    const username = ref('')
+
+    // 从 localStorage 初始化
+    const userInfo = localStorage.getItem('user_info')
+    if (userInfo) {
+      const user = JSON.parse(userInfo)
+      isLogin.value = true
+      username.value = user.username || ''
+    }
+
+    // ===== 注入购物车 =====
     const cartState = inject('cartState', { items: [] })
     const showCartSidebar = inject('showCartSidebar', () => {})
-    const authState = inject('authState', { isAuthenticated: false })
 
-    // 用户菜单显示状态
-    const showUserMenu = ref(false)
-
-    // 计算购物车商品数量
+    // 购物车数量
     const cartItemCount = computed(() => {
       return cartState.items ? cartState.items.length : 0
     })
 
-    // 跳转到登录页面
+    // ===== 路由跳转 =====
     const goToLogin = () => {
       router.push('/login')
+    }
+
+    const goRegister = () => {
+      router.push('/register')
+    }
+
+    const goHome = () => {
+      router.push('/')
     }
 
     // ===== 退出登录 =====
@@ -77,33 +93,26 @@ export default {
       isLogin.value = false
       username.value = ''
 
-      //router.push('/login')
-    }
-    // 处理登出
-    const handleLogout = () => {
-      if (confirm('确定要退出登录吗？')) {
-        logout()
-        alert('已退出登录')
-        router.push('/')
-      }
+      router.push('/')
     }
 
     return {
+      // 状态
+      isLogin,
+      username,
       cartItemCount,
-      authState,
-      goRegister,
-      showCartSidebar,
-      showUserMenu,
+
+      // 方法
       goToLogin,
-      isLogin,
-      handleLogout,
+      goRegister,
       goHome,
-      isLogin,
-      username
+      logout,
+      showCartSidebar
     }
   }
 }
 </script>
+
 
 <style scoped>
 .TitleBackground {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import StoreApp from '@/components/StoreApp.vue'
 import ProductDetail from '@/components/ProductDetail.vue'
 import ShoppingCart from '@/components/ShoppingCart.vue'
+import RegisterUser from '@/components/RegisterUser.vue'
 import Login from '@/components/Login.vue'
 
 const routes = [
