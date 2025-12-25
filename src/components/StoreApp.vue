@@ -90,7 +90,6 @@ import AppHeader from "./AppHeader.vue";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { productService } from "@/services/api";
 import logo from "@/assets/Lenovo.png";
-// 分类图标导入
 import allDefault from "@/assets/icons/all-default.png";
 import desktopDefault from "@/assets/icons/desktop-default.png";
 import desktopActive from "@/assets/icons/desktop-active.png";
