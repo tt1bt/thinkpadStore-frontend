@@ -322,11 +322,11 @@ export default {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: #666;
-  font-size: 20px;
+  color: #8C8C8C;
+  font-size: 15px;
   transition: color 0.2s ease;
 }
-.category-tab.active, .category-tab:hover { color: #409eff; }
+.category-tab.active, .category-tab:hover { color: #000000; }
 .category-icon {
   width: 80px;
   height: 60px;
@@ -354,7 +354,14 @@ export default {
 }
 .retry-btn:hover { background: #66b1ff; }
 
-.grid { display: grid; grid-template-columns: repeat(4,1fr); gap:16px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 95%;
+  margin: 0 auto;
+  padding: 8px 0;
+}
 .card { text-decoration: none; color: inherit; }
 .card-inner {
   width: 100%;
@@ -382,16 +389,29 @@ export default {
 .caption {
   padding: 0 12px;
   text-align: center;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: #222;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 .desc {
-  padding: 8px 12px;
+  padding: 0 12px;
   text-align: center;
-  font-size: 14px;
-  color: #666;
-  line-height: 1.4;
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 .price {
   padding: 10px 12px 20px;
