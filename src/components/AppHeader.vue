@@ -1,6 +1,6 @@
 <template>
   <div class="TitleBackground">
-    <div class="Logo">
+    <div class="Logo" @click="goHome">
       <img alt="Lenovo Logo" src="@/assets/Lenovo.png" />
       <span class="logo-text">联想商店</span>
     </div>
